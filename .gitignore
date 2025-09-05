@@ -1,0 +1,38 @@
+# Environnements virtuels
+venv/
+env/
+ENV/
+.venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Fichiers système
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Variables d'environnement
+.env
+.env.local
+
+# Logs
+*.log
+
+# Dossiers de dépendances
+node_modules/
+
+# Fichiers IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Fichiers temporaires
+*.tmp
+*.temp
