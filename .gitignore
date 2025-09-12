@@ -1,38 +1,59 @@
-# Environnements virtuels
+Fichiers et dossiers à ignorer par Git
+Modèles volumineux
+models/
+hf-seamless-m4t-medium/
+vosk-model-fr/
+vosk-model-en/
+vosk-model-ja/
+piper-voices.zip
+
+Environnements virtuels
 venv/
 env/
 ENV/
 .venv/
+venv_py311/
+melotts_env/
 
-# Cache Python
-__pycache__/
+Cache Python
+pycache/
 *.pyc
 *.pyo
 *.pyd
 
-# Fichiers système
+Fichiers système
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
 
-# Variables d'environnement
+Variables d'environnement
 .env
 .env.local
 
-# Logs
+Logs
 *.log
 
-# Dossiers de dépendances
+Dossiers de dépendances
 node_modules/
 
-# Fichiers IDE
+Fichiers IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Fichiers temporaires
+Fichiers temporaires générés par l'application
 *.tmp
 *.temp
+*.wav
+*.mp3
+TRADUCTION-MODELE-OK.py
+Test-TTS-JAP.py
+Test-phoenetiseur.py
+app(80%OK).py
+app(90%OK).py
+app(HELSINKI).py
+mecab.py
+unity_on_device.ptl
