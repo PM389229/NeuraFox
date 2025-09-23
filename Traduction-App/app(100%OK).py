@@ -29,8 +29,9 @@ VOSK_MODELS = {
 TTS_MODELS = {
     "Français": "tts_models/fr/css10/vits",            
     "Anglais": "tts_models/en/ljspeech/vits",         
-    "Japonais": "tts_models/ja/kokoro/tacotron2-DDC"  
+    "Japonais": "/Users/macbook/NeuraFox/Traduction-App/models/tts/melotts-japanese"  
 }
+
 
 # Paramètres pour la détection de silence
 SILENCE_THRESHOLD = 0.01  # Seuil de détection du silence (amplitude)
@@ -68,10 +69,19 @@ def load_vosk_model(lang_name):
 def load_tts_model(lang_name):
     try:
         model_path = TTS_MODELS[lang_name]
-        return TTS(model_path, gpu=False)
+        if lang_name == "Japonais":
+            from melo.api import TTS as MeloTTS
+            model = MeloTTS(language='JP', device='cpu')
+            # Récupération de l'ID du speaker JP
+            model.speaker_id = model.hps.data.spk2id['JP']
+            return model
+        else:
+            from TTS.api import TTS
+            return TTS(model_path, gpu=False)
     except Exception as e:
         st.error(f"Erreur lors du chargement TTS pour {lang_name} : {e}")
         return None
+
 
 # =======================
 # FONCTIONS AMÉLIORÉES
@@ -267,59 +277,46 @@ def translate_text(text, source_lang, target_lang, model, processor):
         st.error(f"Erreur lors de la traduction : {e}")
         return ""
 
+
 def speak_text_improved(text, lang_name):
-    """Version améliorée de la synthèse vocale avec meilleure gestion d'erreurs"""
     if not text or not text.strip():
         st.warning("Texte vide, synthèse vocale ignorée")
         return False
         
     try:
-        # Chargement du modèle TTS
         tts = load_tts_model(lang_name)
         if tts is None:
             st.error(f"❌ Modèle TTS non disponible pour {lang_name}")
             return False
         
-        # Nettoyage et préparation du texte
         clean_text = text.strip()
-        
-        # Limitation de la longueur du texte pour éviter les erreurs
         if len(clean_text) > 500:
             clean_text = clean_text[:500] + "..."
-            st.info("Texte tronqué à 500 caractères pour la synthèse vocale")
         
-        # Génération du fichier audio
         out_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav").name
         
-        # Affichage du progrès
         with st.spinner(f"Génération audio en {lang_name}..."):
-            tts.tts_to_file(text=clean_text, file_path=out_path)
+            if lang_name == "Japonais":
+                # MeloTTS
+                tts.tts_to_file(clean_text, tts.speaker_id, out_path, speed=1.0)
+            else:
+                # TTS standard
+                tts.tts_to_file(text=clean_text, file_path=out_path)
         
-        # Vérification du fichier généré
         if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
             st.audio(out_path, format="audio/wav")
             st.success(f"✅ Synthèse vocale réussie en {lang_name}")
-            
-            # Informations sur le fichier généré
-            file_size = os.path.getsize(out_path)
-            st.caption(f"Fichier audio généré : {file_size} octets")
-            
-            # Nettoyage différé du fichier temporaire
-            try:
-                os.unlink(out_path)
-            except:
-                pass
-                
+            try: os.unlink(out_path)
+            except: pass
             return True
         else:
             st.error("❌ Fichier audio généré vide ou inexistant")
             return False
-            
+
     except Exception as e:
         st.error(f"❌ Erreur TTS pour {lang_name} : {e}")
-        # Affichage d'informations détaillées pour le debug
-        st.error(f"Détails : {str(e)}")
         return False
+
 
 # =======================
 # INTERFACE STREAMLIT

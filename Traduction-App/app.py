@@ -10,6 +10,8 @@ from TTS.api import TTS
 import threading
 import queue
 import time
+from melo.api import TTS as MeloTTS
+import subprocess
 
 # =======================
 # CONFIG OFFLINE
@@ -19,25 +21,30 @@ LANGUAGES_TO_CODES = {
     "Anglais": "__eng__",
     "Japonais": "__jpn__"
 }
-MODEL_LOCAL_DIR = "/Users/macbook/NeuraFox/Traduction-App/hf-seamless-m4t-medium"
+
+# Utilisation d'un chemin dynamique pour tous les modèles
+# Cela rend le script indépendant de l'emplacement de lancement
+base_path = os.path.dirname(os.path.abspath(__file__))
+
+MODEL_LOCAL_DIR = os.path.join(base_path, "hf-seamless-m4t-medium")
 
 VOSK_MODELS = {
-    "Français": "/Users/macbook/NeuraFox/Traduction-App/vosk-model-fr",
-    "Anglais": "/Users/macbook/NeuraFox/Traduction-App/vosk-model-en",
+    "Français": os.path.join(base_path, "vosk-model-fr"),
+    "Anglais": os.path.join(base_path, "vosk-model-en"),
 }
 
-TTS_MODELS = {
-    "Français": "tts_models/fr/css10/vits",            
-    "Anglais": "tts_models/en/ljspeech/vits",         
-    "Japonais": "/Users/macbook/NeuraFox/Traduction-App/models/tts/melotts-japanese"  
+# Dictionnaire centralisé pour les chemins des scripts TTS
+TTS_SCRIPT_PATHS = {
+    "Français": os.path.join(base_path, "generate_tts_fr.py"),
+    "Anglais": os.path.join(base_path, "generate_tts_en.py"),
+    "Japonais": os.path.join(base_path, "generate_tts_jp.py")
 }
-
 
 # Paramètres pour la détection de silence
-SILENCE_THRESHOLD = 0.01  # Seuil de détection du silence (amplitude)
-SILENCE_DURATION = 2.0    # Durée de silence pour arrêter l'enregistrement (secondes)
-MAX_RECORDING_TIME = 60.0 # Durée maximale d'enregistrement (secondes)
-SAMPLE_RATE = 16000       # Fréquence d'échantillonnage
+SILENCE_THRESHOLD = 0.01
+SILENCE_DURATION = 2.0
+MAX_RECORDING_TIME = 60.0
+SAMPLE_RATE = 16000
 
 # =======================
 # CHARGEMENT DES MODÈLES
@@ -65,22 +72,12 @@ def load_vosk_model(lang_name):
         return None
     return Model(path)
 
+# Cette fonction est maintenant obsolète car toutes les synthèses vocales
+# sont gérées par des scripts externes, mais nous la gardons pour éviter
+# de modifier d'autres parties du code.
 @st.cache_resource
 def load_tts_model(lang_name):
-    try:
-        model_path = TTS_MODELS[lang_name]
-        if lang_name == "Japonais":
-            from melo.api import TTS as MeloTTS
-            model = MeloTTS(language='JP', device='cpu')
-            # Récupération de l'ID du speaker JP
-            model.speaker_id = model.hps.data.spk2id['JP']
-            return model
-        else:
-            from TTS.api import TTS
-            return TTS(model_path, gpu=False)
-    except Exception as e:
-        st.error(f"Erreur lors du chargement TTS pour {lang_name} : {e}")
-        return None
+    return None
 
 
 # =======================
@@ -143,7 +140,7 @@ def record_with_silence_detection(duration=MAX_RECORDING_TIME, sample_rate=SAMPL
                         st.info("🤫 Silence détecté - Arrêt de l'enregistrement")
                         break
                 else:
-                    silence_start = None  # Reset du compteur de silence
+                    silence_start = None
                     
             except queue.Empty:
                 # Pas de nouvelles données, continuer
@@ -284,26 +281,24 @@ def speak_text_improved(text, lang_name):
         return False
         
     try:
-        tts = load_tts_model(lang_name)
-        if tts is None:
-            st.error(f"❌ Modèle TTS non disponible pour {lang_name}")
-            return False
-        
-        clean_text = text.strip()
-        if len(clean_text) > 500:
-            clean_text = clean_text[:500] + "..."
-        
         out_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav").name
+        success = False
         
         with st.spinner(f"Génération audio en {lang_name}..."):
-            if lang_name == "Japonais":
-                # MeloTTS
-                tts.tts_to_file(clean_text, tts.speaker_id, out_path, speed=1.0)
+            script_path = TTS_SCRIPT_PATHS.get(lang_name)
+            if not script_path:
+                st.error(f"❌ Aucun script TTS disponible pour {lang_name}")
+                return False
+
+            cmd = ["python", script_path, json.dumps({'text': text, 'output_path': out_path})]
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            
+            if result.returncode == 0 and "Success" in result.stdout:
+                success = True
             else:
-                # TTS standard
-                tts.tts_to_file(text=clean_text, file_path=out_path)
+                st.error(f"❌ Erreur du script TTS: {result.stderr}")
         
-        if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
+        if success and os.path.exists(out_path) and os.path.getsize(out_path) > 0:
             st.audio(out_path, format="audio/wav")
             st.success(f"✅ Synthèse vocale réussie en {lang_name}")
             try: os.unlink(out_path)
@@ -411,16 +406,16 @@ if st.session_state.get("translated"):
     st.write(f"**Langue :** {current_target_lang}")
     
     # Informations sur le modèle TTS
-    tts_model_info = TTS_MODELS.get(current_target_lang, "Modèle non disponible")
-    st.caption(f"Modèle TTS : {tts_model_info}")
+    tts_model_info = TTS_SCRIPT_PATHS.get(current_target_lang, "Modèle non disponible")
+    st.caption(f"Script TTS : {tts_model_info}")
     
-    if current_target_lang not in TTS_MODELS:
-        st.error(f"❌ Aucun modèle TTS disponible pour {current_target_lang}")
+    if current_target_lang not in TTS_SCRIPT_PATHS:
+        st.error(f"❌ Aucun script TTS disponible pour {current_target_lang}")
     else:
         if st.button("🔊 Prononcer la traduction", type="primary"):
             success = speak_text_improved(current_translation, current_target_lang)
             if success:
-                st.balloons()  # Effet visuel de succès
+                st.balloons()
 
 # === ÉTAPE 4: VOTRE RÉPONSE (nouvelle section) ===
 st.markdown("---")
@@ -470,9 +465,9 @@ with st.expander("🔧 Informations de débogage"):
     st.write(f"- Vosk FR: {VOSK_MODELS.get('Français', 'N/A')}")
     st.write(f"- Vosk EN: {VOSK_MODELS.get('Anglais', 'N/A')}")
     
-    st.write("**Modèles TTS :**")
-    for lang, model in TTS_MODELS.items():
-        st.write(f"- {lang}: {model}")
+    st.write("**Scripts TTS :**")
+    for lang, path in TTS_SCRIPT_PATHS.items():
+        st.write(f"- {lang}: {path}")
 
 # === RÉINITIALISATION ===
 st.markdown("---")
