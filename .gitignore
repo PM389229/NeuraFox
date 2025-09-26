@@ -1,11 +1,20 @@
 Fichiers et dossiers à ignorer par Git
 Modèles volumineux
-models/
-hf-seamless-m4t-medium/
-vosk-model-fr/
-vosk-model-en/
-vosk-model-ja/
-piper-voices.zip
+Nous rendons les règles récursives ou spécifiques à Traduction-App/
+Règle pour les sous-dossiers spécifiques des modèles
+Traduction-App/models/
+Traduction-App/hf-seamless-m4t-medium/
+Traduction-App/vosk-model-fr/
+Traduction-App/vosk-model-en/
+Traduction-App/vosk-model-ja/
+Traduction-App/piper-voices.zip
+
+Cache général et cache sous Traduction-App
+cache/
+.cache/
+**/cache/
+**/hf-seamless-m4t-medium/
+Traduction-App/cache/
 
 Environnements virtuels
 venv/
@@ -57,3 +66,6 @@ app(90%OK).py
 app(HELSINKI).py
 mecab.py
 unity_on_device.ptl
+
+Dossier du sous-dépôt à ignorer
+Traduction-App/MeloTTS/
