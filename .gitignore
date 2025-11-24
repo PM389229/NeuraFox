@@ -23,6 +23,7 @@ ENV/
 .venv/
 venv_py311/
 melotts_env/
+venv_unified/
 
 Cache Python
 pycache/
@@ -66,6 +67,16 @@ app(90%OK).py
 app(HELSINKI).py
 mecab.py
 unity_on_device.ptl
+
+
+
+
+# Dossiers de Données Volumineuses / Dictionnaires (Identifiés par l'erreur GitHub)
+# Ces dossiers contiennent des fichiers qui dépassent 100Mo
+unidic-mecab-2.1.2/
+unidic-mecab/
+sudachidict_core/
+
 
 Dossier du sous-dépôt à ignorer
 Traduction-App/MeloTTS/

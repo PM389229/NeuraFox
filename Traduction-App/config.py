@@ -17,7 +17,7 @@ MAX_RECORDING_TIME = 60.0 # Durée maximale d'enregistrement
 LANGUAGES_DATA = {
     "Français": {"seamless_code": "__fra__", "vosk_model_id": "vosk-model-small-fr-0.22", "tts_lang_code": "FR"},
     "Anglais": {"seamless_code": "__eng__", "vosk_model_id": "vosk-model-small-en-us-0.22", "tts_lang_code": "EN"},
-    "Japonais": {"seamless_code": "__jpn__", "vosk_model_id": None, "tts_lang_code": "JA"},
+    "Japonais": {"seamless_code": "__jpn__", "vosk_model_id": None, "tts_lang_code": "JP"},
     "Allemand": {"seamless_code": "__deu__", "vosk_model_id": "vosk-model-small-de-0.21", "tts_lang_code": "DE"},
     "Espagnol": {"seamless_code": "__spa__", "vosk_model_id": "vosk-model-small-es-0.42", "tts_lang_code": "ES"},
     "Russe": {"seamless_code": "__rus__", "vosk_model_id": "vosk-model-small-ru-0.10", "tts_lang_code": "RU"},

@@ -1,4 +1,3 @@
-# model_manager.py
 import os
 import streamlit as st
 import logging
@@ -13,7 +12,7 @@ import queue
 import time
 
 from vosk import Model, KaldiRecognizer
-from transformers import AutoProcessor, SeamlessM4TModel, VitsModel, AutoTokenizer
+from transformers import SeamlessM4TProcessor, SeamlessM4TModel, VitsModel, AutoTokenizer
 try:
     import whisper 
 except ImportError:
@@ -46,13 +45,14 @@ class ModelManager:
         
         local_path = MODEL_LOCAL_DIR
         # Utilisation de la version 'medium' comme convenu
-        hf_model_name = "facebook/seamless-m4t-medium"
+        hf_model_name = "facebook/hf-seamless-m4t-medium"
         model_source = local_path
         local_only = True 
         
         if os.path.exists(local_path) and os.path.isdir(local_path):
             logging.info(f"SeamlessM4T trouvé localement : {local_path}.")
             model_source = local_path
+            local_only = True
         else:
             logging.info(f"SeamlessM4T non trouvé localement. Tentative de chargement via Hugging Face.")
             st.warning("⚠️ Le modèle SeamlessM4T est très volumineux. Un téléchargement est en cours.")
@@ -61,8 +61,8 @@ class ModelManager:
         
         logging.info("Chargement du Modèle et Processeur SeamlessM4T...")
         try:
-            # S'assurer d'utiliser la bonne classe SeamlessM4TModel
-            processor = AutoProcessor.from_pretrained(model_source, local_files_only=local_only)
+            # CORRECTION : Ajout de use_fast=False pour éviter l'échec de conversion du SentencePiece
+            processor = SeamlessM4TProcessor.from_pretrained(model_source, local_files_only=local_only, use_fast=False)
             model = SeamlessM4TModel.from_pretrained(model_source, local_files_only=local_only)
             
             logging.info("Modèle SeamlessM4T chargé avec succès.")

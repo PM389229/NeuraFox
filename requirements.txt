@@ -1,0 +1,17 @@
+torch
+numpy
+melo
+unidic
+torchaudio
+soundfile
+streamlit
+transformers
+torch
+openai-whisper
+vosk
+sounddevice
+numpy
+unidic-lite
+sentenpiece
+librosa==0.9.1
+git+https://github.com/myshell-ai/MeloTTS

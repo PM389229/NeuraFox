@@ -1,9 +1,0 @@
-streamlit
-transformers
-torch
-whisper
-vosk
-sounddevice
-TTS
-melo-tts
-numpy
