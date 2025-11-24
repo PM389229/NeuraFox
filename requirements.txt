@@ -12,7 +12,7 @@ vosk
 sounddevice
 numpy
 unidic-lite
-sentenpiece
+sentencepiece
 librosa==0.9.1
 mecab-python3==1.0.9
 git+https://github.com/myshell-ai/MeloTTS
