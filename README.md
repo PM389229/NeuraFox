@@ -55,21 +55,94 @@ streamlit run app.py
 
 
 
---->téléchargez unidic_mecab et à mettre ici : C:\Users\User\Neurafox\unidic-mecab-2.1.2
---->Lien ;  https://clrd.ninjal.ac.jp/unidic_archive/cwj/2.1.2/unidic-mecab-2.1.2_bin.zip (à decompresser et mettre ou précisé au dessus)
-----> UniDic est la base de données de vocabulaire utilisée par l'analyseur MeCab. Il est indispensable pour la synthèse vocale japonaise (MeloTTS), car il fournit les informations d'accent tonique (pitch accent) et de prononciation nécessaires pour générer une voix qui sonne naturelle. Sans lui, le moteur TTS ne peut pas segmenter et prononcer le japonais correctemen
+                      
+                      
+                      Configuration spécifique par OS
 
 
-🌐 Modèle de traduction (SeamlessM4T de Meta)
-
-Ce modèle permet de traduire sans connexion Internet. Il est très volumineux, mais il est au cœur du projet.
-
-Son téléchargement est automatique à la première utilisation si détection de son absence
+🔹 Windows
 
 
-🗣️ Modèles de synthèse vocale (TTS)
+Chemin UniDic pour MeloTTS
 
-Tous les modèles sont comme Seamless téléchargés automatiquement à leur non-détection
+Téléchargez UniDic 2.1.2 :
+https://clrd.ninjal.ac.jp/unidic_archive/cwj/2.1.2/unidic-mecab-2.1.2_bin.zip
+
+Décompressez dans :
+
+C:\Users\User\Neurafox\unidic-mecab-2.1.2
+
+
+Ce chemin doit correspondre à la variable MECAB_DIC_PATH dans melo_tts_service.py.
+
+Activation de l’environnement
+
+.\venv_unified\Scripts\activate
+
+
+
+
+🔹 macOS
+
+Installer MeCab et IPADIC
+
+brew install mecab mecab-ipadic
+
+
+Installer UniDic pour Python
+
+pip install unidic
+python -m unidic download
+
+
+UniDic est la base de vocabulaire utilisée par MeCab pour générer une voix japonaise naturelle avec MeloTTS. Sur macOS, le chemin est géré automatiquement via unidic.DICDIR.
+
+
+
+
+                          
+                          Activation de l’environnement
+
+source tts-mac-single/bin/activate
+
+                         Lancer l’interface Streamlit
+streamlit run app.py
+ 
+
+
+
+                         Modèles utilisés
+
+SeamlessM4T (Meta)
+
+Traduction hors ligne.
+
+Très volumineux, téléchargement automatique à la première utilisation si absent.
+
+MMS-TTS
+
+Pour français et anglais.
+
+Téléchargement automatique si non détecté.
+
+MeloTTS
+
+Pour japonais (JA) et mandarin (ZH).
+
+Nécessite MeCab + UniDic.
+
+
+
+
+⚠️ Notes importantes
+
+Assurez-vous que MeCab et UniDic soient installés avant d’utiliser MeloTTS pour JA/ZH.
+
+MMS-TTS pour FR/EN fonctionne sans configuration supplémentaire.
+
+Le chemin du dictionnaire sur Windows doit être codé dans melo_tts_service.py.
+
+Sur macOS, le chemin est géré automatiquement via unidic.DICDIR.
 
 
 
